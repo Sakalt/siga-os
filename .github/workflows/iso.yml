@@ -9,12 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # shallow cloneを無効にすることで、すべてのブランチを取得
 
       - name: Install mkisofs
         run: sudo apt-get update && sudo apt-get install -y genisoimage
@@ -24,25 +22,8 @@ jobs:
           mkdir -p output
           mkisofs -o output/repository.iso .
 
-      - name: Commit ISO to master branch
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout master  # masterブランチに切り替え
-          cp output/repository.iso ./repository.iso  # 生成したISOをルートディレクトリにコピー
-          git add repository.iso
-          git commit -m "Add ISO image"
-          git push origin master  # masterブランチにプッシュ
-        env:
-          ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v3
         with:
           name: repository-iso
           path: output/repository.iso
-
-      - name: Display artifact download URL
-        run: |
-          echo "The artifact can be downloaded from:"
-          echo "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
