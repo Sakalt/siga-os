@@ -1,0 +1,29 @@
+name: Create ISO Image Without Compression
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install genisoimage
+        run: sudo apt-get update && sudo apt-get install -y genisoimage
+
+      - name: Create ISO image using genisoimage
+        run: |
+          mkdir -p output
+          genisoimage -o output/repository.iso .
+
+      - name: Upload ISO artifact without compression
+        uses: actions/upload-artifact@v3
+        with:
+          name: repository-iso
+          path: output/repository.iso
