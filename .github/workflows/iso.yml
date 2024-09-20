@@ -1,4 +1,4 @@
-name: Create ISO Image Without Compression
+name: Create and Compress ISO Image
 
 on:
   push:
@@ -9,21 +9,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install xorriso
-        run: sudo apt-get update && sudo apt-get install -y xorriso
+      - name: Install mkisofs and xz
+        run: sudo apt-get update && sudo apt-get install -y genisoimage xz-utils
 
-      - name: Create ISO image using xorriso
+      - name: Create ISO image using mkisofs
         run: |
           mkdir -p output
-          xorriso -as mkisofs -o output/repository.iso .
+          mkisofs -o output/repository.iso .
 
-      - name: Upload ISO artifact without compression
+      - name: Compress ISO image with xz
+        run: |
+          xz -z output/repository.iso
+
+      - name: Upload compressed ISO artifact
         uses: actions/upload-artifact@v3
         with:
-          name: repository-iso
-          path: output/repository.iso
+          name: repository-iso-compressed
+          path: output/repository.iso.xz
